@@ -72,6 +72,8 @@ Project: `<project>/.pi/project-memory.config.json`
 - Asks user confirmation for mid-confidence
 - Skips on failed/aborted runs
 
+The LLM classifier uses the model and API key from your current pi session — no separate configuration needed. If no model is available, it falls back to the rule-based classifier automatically.
+
 ## Dev
 
 ```bash
