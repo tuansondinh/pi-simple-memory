@@ -12,11 +12,11 @@
  *   before_agent_start → inject memory system prompt
  *
  * Commands:
- *   /memories          → list all saved memories
- *   /remember <text>   → ask agent to save something now
- *   /forget <topic>    → ask agent to find and remove a memory
- *   /dream             → ask agent to consolidate/prune memory inline
- *   /extract           → ask agent to extract memories from recent context
+ *   /memory:list             → list all saved memories
+ *   /memory:remember <text>   → ask agent to save something now
+ *   /memory:forget <topic>    → ask agent to find and remove a memory
+ *   /memory:dream             → ask agent to consolidate/prune memory inline
+ *   /memory:extract           → ask agent to extract memories from recent context
  */
 
 import { readFileSync, existsSync, writeFileSync } from 'node:fs';
@@ -129,11 +129,13 @@ ${MEMORY_FRONTMATTER_EXAMPLE.join('\n')}
 export default function memoryExtension(pi: ExtensionAPI) {
   let memoryCwd = '';
   let memoryDir = '';
+  let injected = false;
 
-  // ── session_start: bootstrap ──────────────────────────────────────────────
+  // ── session_start: bootstrap memory dir ──────────────────────────────────
   pi.on('session_start', async (_event, ctx) => {
     memoryCwd = ctx.cwd;
     memoryDir = getMemoryDir(memoryCwd);
+    injected = false;
     ensureMemoryDir(memoryCwd);
 
     const entrypoint = getMemoryEntrypoint(memoryCwd);
@@ -142,16 +144,17 @@ export default function memoryExtension(pi: ExtensionAPI) {
     }
   });
 
-  // ── before_agent_start: inject memory prompt ──────────────────────────────
+  // ── before_agent_start: inject once per session ─────────────────────────
   pi.on('before_agent_start', async (event) => {
-    if (!memoryCwd) return;
+    if (!memoryCwd || injected) return;
+    injected = true;
 
     const entrypoint = getMemoryEntrypoint(memoryCwd);
     let entrypointContent = '';
     try {
       entrypointContent = readFileSync(entrypoint, 'utf-8');
     } catch {
-      // deleted between session_start and now — no-op
+      // unreadable — skip
     }
 
     if (entrypointContent.trim()) {
@@ -159,15 +162,14 @@ export default function memoryExtension(pi: ExtensionAPI) {
       entrypointContent = content;
     }
 
-    const prompt = buildMemoryPrompt(memoryDir, entrypointContent, !!entrypointContent.trim());
-
     return {
-      systemPrompt: event.systemPrompt + '\n\n' + prompt,
+      systemPrompt: event.systemPrompt + '\n\n' +
+        buildMemoryPrompt(memoryDir, entrypointContent, !!entrypointContent.trim()),
     };
   });
 
-  // ── /memories — list all saved memories ──────────────────────────────────
-  pi.registerCommand('memories', {
+  // ── /memory:list — list all saved memories ───────────────────────────────
+  pi.registerCommand('memory:list', {
     description: 'List all saved memories',
     handler: async (_args, ctx) => {
       if (!memoryCwd) {
@@ -176,21 +178,21 @@ export default function memoryExtension(pi: ExtensionAPI) {
       }
       const memories = scanMemoryFiles(memoryDir);
       if (memories.length === 0) {
-        pi.sendUserMessage("No memories saved yet. I'll start building memory as we work together.");
+        ctx.ui.notify('No memories saved yet.', 'info');
         return;
       }
       const lines = memories.map((m) => {
         const age = memoryAge(m.mtimeMs);
         const type = m.type ? `[${m.type}] ` : '';
         const desc = m.description ? ` — ${m.description}` : '';
-        return `- ${type}**${m.filename}** (${age})${desc}`;
+        return `${type}${m.filename} (${age})${desc}`;
       });
-      pi.sendUserMessage(`Here are your saved memories:\n\n${lines.join('\n')}`);
+      ctx.ui.notify(`Memories (${memories.length}):\n\n${lines.join('\n')}`, 'info');
     },
   });
 
-  // ── /remember <text> — save a memory immediately ─────────────────────────
-  pi.registerCommand('remember', {
+  // ── /memory:remember <text> — save a memory immediately ──────────────────
+  pi.registerCommand('memory:remember', {
     description: 'Save a memory immediately',
     handler: async (args) => {
       if (!memoryCwd) return;
@@ -200,8 +202,8 @@ export default function memoryExtension(pi: ExtensionAPI) {
     },
   });
 
-  // ── /forget <topic> — remove a memory ────────────────────────────────────
-  pi.registerCommand('forget', {
+  // ── /memory:forget <topic> — remove a memory ─────────────────────────────
+  pi.registerCommand('memory:forget', {
     description: 'Find and remove a memory by topic',
     handler: async (args) => {
       if (!memoryCwd) return;
@@ -211,8 +213,8 @@ export default function memoryExtension(pi: ExtensionAPI) {
     },
   });
 
-  // ── /dream — consolidate memory inline ───────────────────────────────────
-  pi.registerCommand('dream', {
+  // ── /memory:dream — consolidate memory inline ────────────────────────────
+  pi.registerCommand('memory:dream', {
     description: 'Consolidate and prune memories (runs inline in this session)',
     handler: async (_args, ctx) => {
       if (!memoryCwd) {
@@ -235,8 +237,8 @@ When done, give a short summary of what you consolidated, updated, pruned, or le
     },
   });
 
-  // ── /extract — extract memories from recent context ───────────────────────
-  pi.registerCommand('extract', {
+  // ── /memory:extract — extract memories from recent context ───────────────
+  pi.registerCommand('memory:extract', {
     description: 'Extract durable memories from this conversation (runs inline)',
     handler: async (_args, ctx) => {
       if (!memoryCwd) {

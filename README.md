@@ -1,89 +1,49 @@
-# pi-simple-memory (fork)
+# pi-claude-memory
 
-Markdown-based project memory extension for Pi.
-
-> **Fork of [zeflq/pi-project-memory](https://github.com/zeflq/pi-project-memory)** — all credit to the original author. This fork adds an agent-callable `remember` tool so the LLM can save memories mid-turn, plus a roadmap toward session-end auto-extract and `/dream` consolidation (inspired by LSD's memory system).
-
-## Fork changes
-
-- **`remember` tool** — LLM can now call `remember({ text, type, category?, title? })` to save a memory without user intervention. Upstream auto-capture only mines user prompts; this closes the gap for memories the agent discovers mid-task.
-- Recall remains tool-free: `MEMORY.md` manifest is already injected into system prompt each turn, and full memory bodies are read via the built-in `read` tool.
+Persistent file-based memory for [pi](https://github.com/badlogic/pi-mono) agents. Ported from the [LSD](https://github.com/lsd-so/lsd) memory extension.
 
 ## Install
 
 ```bash
-pi install https://github.com/zeflq/pi-project-memory
+pi install npm:pi-claude-memory
 ```
 
-## Storage
+## How it works
 
-All memory is stored in project-local markdown files:
-
+Memories are markdown files with YAML frontmatter stored at:
 ```
-.pi/project-memory/
-├── MEMORY.md
-├── decisions.md
-├── patterns.md
-├── preferences.md
-└── gotchas.md
+~/.pi-memory/projects/<name>-<hash>/memory/
 ```
 
-`MEMORY.md` is rebuilt automatically after writes and injected into context.
+`MEMORY.md` is a concise index that gets injected into the system prompt once per session. The agent reads topic files on demand via the `read` tool.
+
+## Memory types
+
+| Type | When to save |
+|---|---|
+| `user` | Preferences, conventions, workflow habits |
+| `feedback` | Corrections or praise about agent behaviour |
+| `project` | Architecture decisions, repo conventions, domain knowledge |
+| `reference` | Useful facts, links, documentation pointers |
 
 ## Commands
 
-```text
-/memory help
-/memory status
-/memory remember <text> [--type decision|pattern|preference|gotcha]
-/memory list [--type ...]
-/memory search <query>
-/memory edit <id> <text>
-/memory remove <id>
-/memory clear [--yes]
-/memory enable --global|--project
-/memory disable --global|--project
-```
+| Command | Description |
+|---|---|
+| `/memory:list` | List all saved memories |
+| `/memory:remember <text>` | Ask agent to save something now |
+| `/memory:forget <topic>` | Ask agent to find and remove a memory |
+| `/memory:dream` | Consolidate and prune memories inline |
+| `/memory:extract` | Extract durable memories from this conversation |
 
-## Config
+## Memory file format
 
-Global: `~/.pi/agent/project-memory.config.json`
+```markdown
+---
+name: my memory
+description: one-line description used to decide relevance
+type: user
+---
 
-Project: `<project>/.pi/project-memory.config.json`
-
-```json
-{
-  "enabled": true,
-  "context": {
-    "maxSectionChars": 2200,
-    "maxLines": 200
-  },
-  "autoCapture": {
-    "enabled": true,
-    "confirm": true,
-    "maxPerTurn": 3,
-    "silentThreshold": 0.85,
-    "classifier": {
-      "mode": "hybrid",
-      "confidenceThreshold": 0.65
-    }
-  }
-}
-```
-
-## Auto-capture
-
-- Captures broad candidate lines from user prompt (before run)
-- Classifies with `rule` / `llm` / `hybrid`
-- Saves silently for high-confidence (`>= silentThreshold`)
-- Asks user confirmation for mid-confidence
-- Skips on failed/aborted runs
-
-The LLM classifier uses the model and API key from your current pi session — no separate configuration needed. If no model is available, it falls back to the rule-based classifier automatically.
-
-## Dev
-
-```bash
-npm run test:project-memory
-npm run check
+Memory content here.
 ```
