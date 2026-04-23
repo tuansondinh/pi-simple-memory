@@ -1,6 +1,6 @@
 {
   "name": "pi-simple-memory",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Simple persistent file-based memory for pi agents.",
   "type": "module",
   "keywords": [
