@@ -1,7 +1,7 @@
 {
-  "name": "pi-claude-memory",
+  "name": "pi-simple-memory",
   "version": "0.1.0",
-  "description": "Persistent file-based memory for pi agents. Ported from the LSD memory extension.",
+  "description": "Simple persistent file-based memory for pi agents.",
   "type": "module",
   "keywords": ["pi-package", "pi", "memory"],
   "license": "MIT",

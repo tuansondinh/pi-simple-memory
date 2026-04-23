@@ -1,11 +1,11 @@
-# pi-claude-memory
+# pi-simple-memory
 
-Persistent file-based memory for [pi](https://github.com/badlogic/pi-mono) agents. Ported from the [LSD](https://github.com/lsd-so/lsd) memory extension.
+Simple persistent file-based memory for [pi](https://github.com/badlogic/pi-mono) agents.
 
 ## Install
 
 ```bash
-pi install npm:pi-claude-memory
+pi install npm:pi-simple-memory
 ```
 
 ## How it works
