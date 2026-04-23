@@ -1,9 +1,14 @@
 {
   "name": "pi-project-memory",
-  "version": "1.0.0",
+  "version": "1.1.0-fork.0",
   "private": true,
   "type": "module",
-  "description": "Pi extension for markdown-based per-project memory",
+  "description": "Pi extension for markdown-based per-project memory (fork of zeflq/pi-project-memory, adds agent-callable `remember` tool)",
+  "forkOf": {
+    "name": "pi-project-memory",
+    "author": "zeflq",
+    "url": "https://github.com/zeflq/pi-project-memory"
+  },
   "pi": {
     "extensions": [
       "./extensions"
@@ -19,7 +24,8 @@
     "release:patch": "npm run check && standard-version --release-as patch"
   },
   "dependencies": {
-    "@mariozechner/pi-coding-agent": "^0.55.1"
+    "@mariozechner/pi-coding-agent": "^0.55.1",
+    "typebox": "^1.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

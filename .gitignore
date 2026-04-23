@@ -3,3 +3,5 @@ coverage/
 .vitest/
 .DS_Store
 *.log
+node_modules/
+.tsc.log

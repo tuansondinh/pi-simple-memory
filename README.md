@@ -1,6 +1,13 @@
-# pi-project-memory
+# pi-project-memory (fork)
 
 Markdown-based project memory extension for Pi.
+
+> **Fork of [zeflq/pi-project-memory](https://github.com/zeflq/pi-project-memory)** — all credit to the original author. This fork adds an agent-callable `remember` tool so the LLM can save memories mid-turn, plus a roadmap toward session-end auto-extract and `/dream` consolidation (inspired by LSD's memory system).
+
+## Fork changes
+
+- **`remember` tool** — LLM can now call `remember({ text, type, category?, title? })` to save a memory without user intervention. Upstream auto-capture only mines user prompts; this closes the gap for memories the agent discovers mid-task.
+- Recall remains tool-free: `MEMORY.md` manifest is already injected into system prompt each turn, and full memory bodies are read via the built-in `read` tool.
 
 ## Install
 
