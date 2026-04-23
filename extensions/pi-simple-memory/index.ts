@@ -42,7 +42,6 @@ const REMEMBER_PARAMS = Type.Object({
 type RememberParams = Static<typeof REMEMBER_PARAMS>;
 
 import { finalizePendingAutoCapture, preparePendingAutoCapture } from "./auto-capture.js";
-import { DREAM_PROMPT, incrementSessions, loadDreamState, markDreamed, saveDreamState, shouldDream } from "./dream-scheduler.js";
 import { getDefaultConfig, getGlobalConfigPath, getProjectConfigPath, loadEffectiveConfig, setEnabledInConfig, setNestedFlagInConfig } from "./config.js";
 import { buildContextInjection } from "./context.js";
 import { handleMemoryCommand } from "./commands/index.js";
@@ -58,8 +57,6 @@ function initialState(): MemoryState {
 		identity: null,
 		memoryDir: null,
 		pendingAutoCaptureCandidates: [],
-		dreamDue: false,
-		dreamPrompted: false,
 	};
 }
 
@@ -95,20 +92,6 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
 			state.config = await loadEffectiveConfig(projectRoot);
 			return true;
 		},
-		setAutoDreamGlobal: async (enabled: boolean) => {
-			const projectRoot = state.identity?.projectRoot;
-			if (!projectRoot) return false;
-			await setNestedFlagInConfig(getGlobalConfigPath(), "autoDream", enabled);
-			state.config = await loadEffectiveConfig(projectRoot);
-			return true;
-		},
-		setAutoDreamProject: async (enabled: boolean) => {
-			const projectRoot = state.identity?.projectRoot;
-			if (!projectRoot) return false;
-			await setNestedFlagInConfig(getProjectConfigPath(projectRoot), "autoDream", enabled);
-			state.config = await loadEffectiveConfig(projectRoot);
-			return true;
-		},
 		setExtractOnNewGlobal: async (enabled: boolean) => {
 			const projectRoot = state.identity?.projectRoot;
 			if (!projectRoot) return false;
@@ -135,37 +118,10 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
 		state.memoryDir = memoryDir;
 		state.ready = true;
 
-		if (config.enabled && config.autoDream.enabled) {
-			let dreamState = await loadDreamState(memoryDir);
-			dreamState = incrementSessions(dreamState);
-			state.dreamDue = shouldDream(dreamState);
-			await saveDreamState(memoryDir, dreamState);
-		}
 	});
 
 	pi.on("before_agent_start", async (event, ctx) => {
 		preparePendingAutoCapture(event.prompt, deps);
-
-		// Prompt for dream consolidation once per session when threshold is hit.
-		if (state.dreamDue && !state.dreamPrompted && state.memoryDir) {
-			state.dreamPrompted = true;
-			const entries = await deps.storage.listEntries(state.memoryDir);
-			if (entries.length > 0) {
-				const wants = await ctx.ui.confirm(
-					"Consolidate memories?",
-					`You have ${entries.length} memories and it's been a while since last consolidation. ` +
-						"Consolidate now? The agent will merge duplicates and clean up stale entries.",
-					{ timeout: 20_000 },
-				);
-				if (wants && state.memoryDir) {
-					const updated = markDreamed();
-					await saveDreamState(state.memoryDir, updated);
-					state.dreamDue = false;
-					pi.sendUserMessage(DREAM_PROMPT, { deliverAs: "steer" });
-				}
-			}
-		}
-
 		return buildContextInjection(event, state);
 	});
 

@@ -13,7 +13,6 @@ export function usage(): string {
 		"  /memory clear [--yes]",
 		"  /memory enable --global|--project",
 		"  /memory disable --global|--project",
-		"  /memory auto-dream enable|disable --global|--project",
 		"  /memory extract-on-new enable|disable --global|--project",
 	].join("\n");
 }

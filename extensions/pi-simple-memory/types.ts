@@ -43,7 +43,6 @@ export interface MemoryConfig {
 	enabled: boolean;
 	context: MemoryContextConfig;
 	autoCapture: AutoCaptureConfig;
-	autoDream: { enabled: boolean };
 	extractOnNew: { enabled: boolean };
 }
 
@@ -71,10 +70,6 @@ export interface MemoryState {
 	identity: ProjectIdentity | null;
 	memoryDir: string | null;
 	pendingAutoCaptureCandidates: string[];
-	/** Set on session_start when dream threshold is hit. */
-	dreamDue: boolean;
-	/** Prevents prompting more than once per session. */
-	dreamPrompted: boolean;
 }
 
 export interface MemoryCommandDeps {
@@ -82,8 +77,6 @@ export interface MemoryCommandDeps {
 	storage: StorageAPI;
 	setEnabledGlobal?: (enabled: boolean) => Promise<boolean>;
 	setEnabledProject?: (enabled: boolean) => Promise<boolean>;
-	setAutoDreamGlobal?: (enabled: boolean) => Promise<boolean>;
-	setAutoDreamProject?: (enabled: boolean) => Promise<boolean>;
 	setExtractOnNewGlobal?: (enabled: boolean) => Promise<boolean>;
 	setExtractOnNewProject?: (enabled: boolean) => Promise<boolean>;
 }
