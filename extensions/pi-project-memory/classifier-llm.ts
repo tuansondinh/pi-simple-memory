@@ -23,7 +23,22 @@ function extractJsonObject(text: string): string | null {
 
 export async function classifyMemoryWithLLM(line: string, ctx: ExtensionContext): Promise<MemoryClassification | null> {
 	if (!ctx.model) return null;
-	const apiKey = await ctx.modelRegistry.getApiKey(ctx.model);
+	// Compat shim: pi 0.69+ renamed `getApiKey(model)` → `getApiKeyAndHeaders(model)`.
+	// `getApiKeyForProvider(provider)` exists in both, so prefer it.
+	const registry = ctx.modelRegistry as unknown as {
+		getApiKeyForProvider?: (provider: string) => Promise<string | undefined>;
+		getApiKey?: (model: unknown) => Promise<string | undefined>;
+		getApiKeyAndHeaders?: (model: unknown) => Promise<{ apiKey?: string } | undefined>;
+	};
+	let apiKey: string | undefined;
+	if (typeof registry.getApiKeyForProvider === "function") {
+		apiKey = await registry.getApiKeyForProvider(ctx.model.provider);
+	} else if (typeof registry.getApiKey === "function") {
+		apiKey = await registry.getApiKey(ctx.model);
+	} else if (typeof registry.getApiKeyAndHeaders === "function") {
+		const res = await registry.getApiKeyAndHeaders(ctx.model);
+		apiKey = res?.apiKey;
+	}
 	if (!apiKey) return null;
 
 	const userMessage: UserMessage = {
