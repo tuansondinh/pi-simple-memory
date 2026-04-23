@@ -177,7 +177,7 @@ export async function writeEntry(
 	const current = await readText(filePath);
 	const next = `${current || headingFor(topic)}${serializeEntry(full)}`;
 	await writeFile(filePath, next, "utf8");
-	const { rebuildIndex } = await import("./memory-index.js");
+	const { rebuildIndex } = await import("./memory-index.ts");
 	await rebuildIndex(dir);
 	return full;
 }
@@ -191,7 +191,7 @@ export async function editEntry(dir: string, id: string, newText: string): Promi
 		entries[index].title = toTitle(newText);
 		const content = `${headingFor(topic)}${entries.map(serializeEntry).join("")}`;
 		await writeFile(topicFilePath(dir, topic), content, "utf8");
-		const { rebuildIndex } = await import("./memory-index.js");
+		const { rebuildIndex } = await import("./memory-index.ts");
 		await rebuildIndex(dir);
 		return entries[index];
 	}
@@ -205,7 +205,7 @@ export async function removeEntry(dir: string, id: string): Promise<boolean> {
 		if (filtered.length === entries.length) continue;
 		const content = filtered.length > 0 ? `${headingFor(topic)}${filtered.map(serializeEntry).join("")}` : headingFor(topic);
 		await writeFile(topicFilePath(dir, topic), content, "utf8");
-		const { rebuildIndex } = await import("./memory-index.js");
+		const { rebuildIndex } = await import("./memory-index.ts");
 		await rebuildIndex(dir);
 		return true;
 	}

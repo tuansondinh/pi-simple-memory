@@ -1,8 +1,8 @@
 import type { ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
 
-import { getDefaultConfig } from "../extensions/pi-project-memory/config.js";
-import { getMemoryDir } from "../extensions/pi-project-memory/storage/markdown.js";
-import type { MemoryState } from "../extensions/pi-project-memory/types.js";
+import { getDefaultConfig } from "../extensions/pi-simple-memory/config.js";
+import { getMemoryDir } from "../extensions/pi-simple-memory/storage/markdown.js";
+import type { MemoryState } from "../extensions/pi-simple-memory/types.js";
 
 export function createState(projectRoot = "/tmp/project"): MemoryState {
 	return {

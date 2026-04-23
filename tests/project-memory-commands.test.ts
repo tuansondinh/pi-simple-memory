@@ -4,11 +4,11 @@ import { join } from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { handleMemoryCommand } from "../extensions/pi-project-memory/commands/index.js";
-import { loadEffectiveConfig } from "../extensions/pi-project-memory/config.js";
-import { getMemoryDir, readTopicFile, writeEntry, clearAll, listEntries, findEntry, entryExists, editEntry, removeEntry } from "../extensions/pi-project-memory/storage/markdown.js";
-import { injectIndex, rebuildIndex } from "../extensions/pi-project-memory/storage/memory-index.js";
-import type { MemoryCommandDeps } from "../extensions/pi-project-memory/types.js";
+import { handleMemoryCommand } from "../extensions/pi-simple-memory/commands/index.js";
+import { loadEffectiveConfig } from "../extensions/pi-simple-memory/config.js";
+import { getMemoryDir, readTopicFile, writeEntry, clearAll, listEntries, findEntry, entryExists, editEntry, removeEntry } from "../extensions/pi-simple-memory/storage/markdown.js";
+import { injectIndex, rebuildIndex } from "../extensions/pi-simple-memory/storage/memory-index.js";
+import type { MemoryCommandDeps } from "../extensions/pi-simple-memory/types.js";
 import { createCommandContext, createState } from "./helpers.js";
 
 describe("project memory commands", () => {

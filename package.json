@@ -1,38 +1,22 @@
 {
-  "name": "pi-project-memory",
-  "version": "1.1.0-fork.0",
-  "private": true,
+  "name": "pi-claude-memory",
+  "version": "0.1.0",
+  "description": "Persistent file-based memory for pi agents. Ported from the LSD memory extension.",
   "type": "module",
-  "description": "Pi extension for markdown-based per-project memory (fork of zeflq/pi-project-memory, adds agent-callable `remember` tool)",
-  "forkOf": {
-    "name": "pi-project-memory",
-    "author": "zeflq",
-    "url": "https://github.com/zeflq/pi-project-memory"
-  },
+  "keywords": ["pi-package", "pi", "memory"],
+  "license": "MIT",
   "pi": {
-    "extensions": [
-      "./extensions"
-    ]
+    "extensions": ["src/index.ts"]
   },
   "scripts": {
-    "test": "vitest --run",
-    "test:project-memory": "vitest --run tests/project-memory-*.test.ts",
-    "check": "npm run test:project-memory && tsc --noEmit",
-    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
-    "release": "npm run check && standard-version",
-    "release:minor": "npm run check && standard-version --release-as minor",
-    "release:patch": "npm run check && standard-version --release-as patch"
+    "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@mariozechner/pi-coding-agent": "^0.55.1",
-    "typebox": "^1.1.0"
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*"
   },
   "devDependencies": {
-    "@types/node": "^24.3.0",
-    "conventional-changelog-cli": "^5.0.0",
-    "standard-version": "^9.5.0",
-    "tsx": "^4.20.5",
-    "typescript": "^5.7.3",
-    "vitest": "^3.2.4"
+    "@mariozechner/pi-coding-agent": "*",
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0"
   }
 }

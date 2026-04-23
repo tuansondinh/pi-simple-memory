@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { editEntry, findEntry, getMemoryDir, listEntries, removeEntry, writeEntry } from "../extensions/pi-project-memory/storage/markdown.js";
+import { editEntry, findEntry, getMemoryDir, listEntries, removeEntry, writeEntry } from "../extensions/pi-simple-memory/storage/markdown.js";
 
 describe("project memory markdown storage", () => {
 	it("writes, edits and removes entries by id", async () => {

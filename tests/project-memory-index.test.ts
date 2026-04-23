@@ -4,8 +4,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { rebuildIndex } from "../extensions/pi-project-memory/storage/memory-index.js";
-import { getMemoryDir, writeEntry } from "../extensions/pi-project-memory/storage/markdown.js";
+import { rebuildIndex } from "../extensions/pi-simple-memory/storage/memory-index.js";
+import { getMemoryDir, writeEntry } from "../extensions/pi-simple-memory/storage/markdown.js";
 
 describe("project memory index", () => {
 	it("rebuilds MEMORY.md from topic files", async () => {

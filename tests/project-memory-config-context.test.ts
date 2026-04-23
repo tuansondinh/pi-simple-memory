@@ -4,10 +4,10 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { loadEffectiveConfig } from "../extensions/pi-project-memory/config.js";
-import { buildContextInjection } from "../extensions/pi-project-memory/context.js";
-import { rebuildIndex } from "../extensions/pi-project-memory/storage/memory-index.js";
-import { getMemoryDir, writeEntry } from "../extensions/pi-project-memory/storage/markdown.js";
+import { loadEffectiveConfig } from "../extensions/pi-simple-memory/config.js";
+import { buildContextInjection } from "../extensions/pi-simple-memory/context.js";
+import { rebuildIndex } from "../extensions/pi-simple-memory/storage/memory-index.js";
+import { getMemoryDir, writeEntry } from "../extensions/pi-simple-memory/storage/markdown.js";
 import { createState } from "./helpers.js";
 
 describe("project memory config and context", () => {

@@ -1,12 +1,20 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "strict": true,
+    "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node", "vitest/globals"]
+    "types": ["node"],
+    "paths": {
+      "./memory-paths.js": ["./src/memory-paths.ts"],
+      "./memory-types.js": ["./src/memory-types.ts"],
+      "./memory-scan.js": ["./src/memory-scan.ts"],
+      "./memory-age.js": ["./src/memory-age.ts"],
+      "./memory-recall.js": ["./src/memory-recall.ts"]
+    }
   },
-  "include": ["extensions/**/*.ts", "tests/**/*.ts", "vitest.config.ts"]
+  "include": ["src/**/*.ts"]
 }

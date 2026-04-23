@@ -4,11 +4,11 @@ import { join } from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { finalizePendingAutoCapture, preparePendingAutoCapture } from "../extensions/pi-project-memory/auto-capture.js";
-import { loadEffectiveConfig } from "../extensions/pi-project-memory/config.js";
-import { clearAll, editEntry, entryExists, findEntry, getMemoryDir, listEntries, readTopicFile, removeEntry, writeEntry } from "../extensions/pi-project-memory/storage/markdown.js";
-import { injectIndex, rebuildIndex } from "../extensions/pi-project-memory/storage/memory-index.js";
-import type { MemoryCommandDeps } from "../extensions/pi-project-memory/types.js";
+import { finalizePendingAutoCapture, preparePendingAutoCapture } from "../extensions/pi-simple-memory/auto-capture.js";
+import { loadEffectiveConfig } from "../extensions/pi-simple-memory/config.js";
+import { clearAll, editEntry, entryExists, findEntry, getMemoryDir, listEntries, readTopicFile, removeEntry, writeEntry } from "../extensions/pi-simple-memory/storage/markdown.js";
+import { injectIndex, rebuildIndex } from "../extensions/pi-simple-memory/storage/memory-index.js";
+import type { MemoryCommandDeps } from "../extensions/pi-simple-memory/types.js";
 import { createState } from "./helpers.js";
 
 function depsFor(root: string): Promise<MemoryCommandDeps> {

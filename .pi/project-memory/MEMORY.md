@@ -2,8 +2,9 @@
 
 > Last updated: 2026-04-23
 
-## Decisions (0)
-- (none)
+## Decisions (2)
+- This project is a fork of pi-project-memory
+- forkOf correctly references the upstream pi-project-memory; only the name field is pi-simple-memory
 
 ## Patterns (0)
 - (none)

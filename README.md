@@ -1,4 +1,4 @@
-# pi-project-memory (fork)
+# pi-simple-memory (fork)
 
 Markdown-based project memory extension for Pi.
 
