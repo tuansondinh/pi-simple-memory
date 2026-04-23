@@ -12,3 +12,9 @@ _Added: 2026-04-23T16:41:46.710Z | Type: decision | Category: architecture | Con
 forkOf correctly references the upstream pi-project-memory; only the name field is pi-simple-memory
 
 ---
+## Disable auto dream feature; require explicit extract call for now. Ship only cor <!-- id:3754 -->
+_Added: 2026-04-23T17:28:22.160Z | Type: decision | Category: policy | Confidence: 0.85 | Source: auto-llm-classifier_
+
+Disable auto dream feature; require explicit extract call for now. Ship only core functionality.
+
+---

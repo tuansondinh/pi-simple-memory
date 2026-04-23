@@ -2,9 +2,10 @@
 
 > Last updated: 2026-04-23
 
-## Decisions (2)
+## Decisions (3)
 - This project is a fork of pi-project-memory
 - forkOf correctly references the upstream pi-project-memory; only the name field is pi-simple-memory
+- Disable auto dream feature; require explicit extract call for now. Ship only core functionality.
 
 ## Patterns (0)
 - (none)

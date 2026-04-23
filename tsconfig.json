@@ -3,13 +3,18 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "allowImportingTsExtensions": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "types": ["node"],
-
+    "paths": {
+      "./memory-paths.js": ["./src/memory-paths.ts"],
+      "./memory-types.js": ["./src/memory-types.ts"],
+      "./memory-scan.js": ["./src/memory-scan.ts"],
+      "./memory-age.js": ["./src/memory-age.ts"],
+      "./memory-recall.js": ["./src/memory-recall.ts"]
+    }
   },
-  "include": ["extensions/**/*.ts"]
+  "include": ["src/**/*.ts"]
 }

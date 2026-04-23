@@ -1,6 +1,6 @@
 # pi-simple-memory
 
-Persistent file-based memory for [pi](https://github.com/badlogic/pi-mono) agents. Memories survive across sessions and are automatically injected into context when relevant.
+Simple persistent file-based memory for [pi](https://github.com/badlogic/pi-mono) agents. Ported from the LSD memory extension.
 
 ## Install
 
@@ -10,119 +10,61 @@ pi install npm:pi-simple-memory
 
 ## How it works
 
-### Storage
-
-Memories are stored as markdown files with YAML frontmatter under:
+Memories are markdown files with YAML frontmatter stored at:
 
 ```
 ~/.pi-memory/projects/<project-name>-<hash>/memory/
-  decisions.md
-  patterns.md
-  preferences.md
-  gotchas.md
   MEMORY.md        ← index, injected into every session
+  <topic>.md       ← individual memory files
 ```
 
-Each project gets its own isolated memory dir, identified by git root path.
+Each project gets its own isolated memory dir, keyed by the git root path.
 
 ### System prompt injection
 
-At the start of every agent turn, the extension injects a `# Project memory` section into the system prompt containing a compact index of all saved memories (`MEMORY.md`). The agent can read individual topic files on demand via the `read` tool for full detail.
+At the start of every agent turn, the extension injects a `# Memory` section into the system prompt containing the full `MEMORY.md` index (up to 200 lines / 25 KB). The agent reads individual topic files on demand with the `read` tool.
 
-This means the agent always knows what has been remembered — without you having to repeat context every session.
+The agent writes and updates memory files directly using the built-in `write` and `edit` tools — no dedicated "remember" tool. Each memory is a markdown file with frontmatter, and gets a one-line pointer in `MEMORY.md`.
 
-### Auto-capture
+## Memory types
 
-After each agent turn, the extension scans your input for lines that look like durable facts worth saving:
-
-- **Rule classifier** — regex patterns that match decisions (`use`, `adopt`, `do not`, `avoid`), patterns (`always`, `consistently`), preferences (`prefer`, `i like`), and gotchas (`watch out`, `be careful`, `footgun`)
-- **LLM classifier** — optional second pass using the active model to score ambiguous candidates
-- **Hybrid mode** (default) — rule classifier runs first; LLM is consulted when confidence is borderline
-
-High-confidence matches (≥ 0.85) are saved silently. Lower-confidence matches (≥ 0.65) are surfaced for review via a select dialog. You can confirm, skip, or dismiss.
-
-The extension also detects folder/file tree structures in agent responses and auto-saves them as `pattern` memories so project layout is remembered.
-
-### Extract on new session
-
-When you start a new session with `/new`, the extension asks whether you want the agent to extract and save important memories from the current conversation before switching. If you confirm, the switch is cancelled and the agent is prompted to review the conversation and call `remember` for anything worth keeping. You can then `/new` again once done.
-
-This can be disabled per-project or globally:
-
-```
-/memory extract-on-new disable --global
-/memory extract-on-new disable --project
-```
-
-### The `remember` tool
-
-The agent can save memories mid-turn without user intervention via the `remember` tool:
-
-```
-remember(text, type, category?, title?)
-```
-
-The agent uses this when it notices something worth keeping — an architecture decision you made, a convention it should follow, a preference you expressed. It won't save transient task instructions or one-off requests.
+| Type | When to save |
+|---|---|
+| `user` | Preferences, conventions, workflow habits |
+| `feedback` | Corrections or praise about agent behaviour |
+| `project` | Architecture decisions, repo conventions, domain knowledge |
+| `reference` | Useful facts, links, documentation pointers |
 
 ## Commands
 
 | Command | Description |
 |---|---|
-| `/memory status` | Show config and memory count |
-| `/memory list [--type ...]` | List saved memories |
-| `/memory search <query>` | Search memories by text |
-| `/memory remember <text> [--type ...]` | Manually save a memory |
-| `/memory edit <id> <text>` | Edit an existing memory |
-| `/memory remove <id>` | Remove a memory |
-| `/memory clear [--yes]` | Delete all memories |
-| `/memory enable --global\|--project` | Enable memory |
-| `/memory disable --global\|--project` | Disable memory |
-| `/memory extract-on-new enable\|disable --global\|--project` | Toggle extract prompt on `/new` |
+| `/memory:list` | List all saved memory files |
+| `/memory:remember <text>` | Ask the agent to save something now |
+| `/memory:forget <topic>` | Ask the agent to find and remove a memory |
+| `/memory:dream` | Ask the agent to consolidate and prune memories inline |
+| `/memory:extract` | Ask the agent to extract durable memories from this conversation |
 
-## Memory types
-
-| Type | When used |
-|---|---|
-| `decision` | Architecture choices, tooling decisions, policies |
-| `pattern` | Recurring conventions, folder structures, workflows |
-| `preference` | User or team preferences, style rules |
-| `gotcha` | Non-obvious pitfalls, caveats, traps |
+All commands except `list` work by sending a user message to the agent, which then performs the action with its normal file tools.
 
 ## Memory file format
 
 ```markdown
 ---
-id: d-001
-title: Use ESM modules
-type: decision
-category: tooling
-addedAt: 2026-04-23T10:00:00Z
+name: My memory
+description: one-line description used to decide relevance in future conversations
+type: user
 ---
 
-Use ESM modules throughout. No CommonJS.
+Memory content here. For feedback/project types, structure as:
+rule/fact, then **Why:** and **How to apply:** lines.
 ```
 
-## Configuration
+## MEMORY.md format
 
-Config files live at `~/.pi/agent/project-memory.config.json` (global) and `.pi/project-memory.config.json` (project). Project config overrides global.
-
-```json
-{
-  "enabled": true,
-  "extractOnNew": { "enabled": true },
-  "autoCapture": {
-    "enabled": true,
-    "confirm": true,
-    "maxPerTurn": 3,
-    "silentThreshold": 0.85,
-    "classifier": {
-      "mode": "hybrid",
-      "confidenceThreshold": 0.65
-    }
-  },
-  "context": {
-    "maxSectionChars": 2200,
-    "maxLines": 200
-  }
-}
+```markdown
+- [My memory](my-memory.md) — one-line hook
+- [Another thing](another-thing.md) — another hook
 ```
+
+Keep entries concise — the whole file is truncated to 200 lines / 25 KB when injected.
