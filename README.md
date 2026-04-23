@@ -22,7 +22,13 @@ Each project gets its own isolated memory dir, keyed by the git root path.
 
 ### System prompt injection
 
-At the start of every agent turn, the extension injects a `# Memory` section into the system prompt containing the full `MEMORY.md` index (up to 200 lines / 25 KB). The agent reads individual topic files on demand with the `read` tool.
+Once per session (on the first agent turn), the extension injects a `# Memory` section into the system prompt containing:
+
+- A short header pointing at the memory dir
+- Guidance on memory types, what to save / not save, how to save, when to recall, and how much to trust recalled memories
+- The full `MEMORY.md` index (truncated to 200 lines / 25 KB if larger)
+
+After that, it stays in context for the whole session — no re-injection on later turns. The agent reads individual topic files on demand with the `read` tool.
 
 The agent writes and updates memory files directly using the built-in `write` and `edit` tools — no dedicated "remember" tool. Each memory is a markdown file with frontmatter, and gets a one-line pointer in `MEMORY.md`.
 
