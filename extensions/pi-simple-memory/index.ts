@@ -114,6 +114,38 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
 		await finalizePendingAutoCapture(event.messages, ctx, deps);
 	});
 
+	// Ask user to extract memories before starting a new session.
+	pi.on("session_before_switch", async (event, ctx) => {
+		if (event.reason !== "new") return;
+		if (!state.ready || !state.config.enabled) return;
+
+		const wantsExtract = await ctx.ui.confirm(
+			"Save memories before starting fresh?",
+			"Do you want the agent to extract and save important memories from this session before opening a new one?",
+			{ timeout: 15_000 },
+		);
+
+		if (!wantsExtract) return; // proceed with switch
+
+		// Cancel the switch and trigger extraction; user can /new again after.
+		pi.sendUserMessage(
+			"Before we start fresh: please review this conversation and use the `remember` tool to save any " +
+			"important decisions, patterns, preferences, or gotchas worth keeping for future sessions. " +
+			"When done, let me know — I'll start the new session.",
+		);
+
+		return { cancel: true };
+	});
+
+	// On exit: no agent turn is possible, so just remind the user.
+	pi.on("session_shutdown", async (_event, ctx) => {
+		if (!state.ready || !state.config.enabled) return;
+		const entries = state.memoryDir ? await deps.storage.listEntries(state.memoryDir) : [];
+		if (entries.length === 0) {
+			ctx.ui.notify("Tip: use /memory remember <text> to save memories for future sessions.", "info");
+		}
+	});
+
 	pi.registerCommand("memory", {
 		description: "Manage project memory",
 		handler: async (args, ctx) => {
