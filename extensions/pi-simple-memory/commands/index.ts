@@ -1,6 +1,8 @@
 import type { ExtensionCommandContext } from "@mariozechner/pi-coding-agent";
 
+import { handleAutoDream } from "./command-auto-dream.js";
 import { handleEdit } from "./command-edit.js";
+import { handleExtractOnNew } from "./command-extract-on-new.js";
 import { handleList } from "./command-list.js";
 import { handleRemember } from "./command-remember.js";
 import { handleRemove } from "./command-remove.js";
@@ -45,6 +47,18 @@ export async function handleMemoryCommand(args: string, ctx: ExtensionCommandCon
 	if (subcommand === "edit") return handleEdit(rest, ctx, deps);
 	if (subcommand === "remove") return handleRemove(rest, ctx, deps);
 	if (subcommand === "clear") return handleClear(rest, ctx, deps);
+	if (subcommand === "auto-dream") {
+		const { subcommand: action, rest: scope } = splitSubcommand(rest);
+		if (action === "enable" || action === "disable") return handleAutoDream(scope, action === "enable", ctx, deps);
+		ctx.ui.notify("Usage: /memory auto-dream enable|disable --global|--project", "warning");
+		return;
+	}
+	if (subcommand === "extract-on-new") {
+		const { subcommand: action, rest: scope } = splitSubcommand(rest);
+		if (action === "enable" || action === "disable") return handleExtractOnNew(scope, action === "enable", ctx, deps);
+		ctx.ui.notify("Usage: /memory extract-on-new enable|disable --global|--project", "warning");
+		return;
+	}
 
 	ctx.ui.notify(`Unknown subcommand '${subcommand}'.\n\n${usage()}`, "warning");
 }

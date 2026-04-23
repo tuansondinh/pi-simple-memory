@@ -14,6 +14,8 @@ type PartialMemoryConfig = {
 		silentThreshold?: number;
 		classifier?: Partial<AutoCaptureConfig["classifier"]>;
 	};
+	autoDream?: { enabled?: boolean };
+	extractOnNew?: { enabled?: boolean };
 };
 
 const DEFAULT_CONFIG: MemoryConfig = {
@@ -32,6 +34,8 @@ const DEFAULT_CONFIG: MemoryConfig = {
 			confidenceThreshold: 0.65,
 		},
 	},
+	autoDream: { enabled: true },
+	extractOnNew: { enabled: true },
 };
 
 export function getDefaultConfig(): MemoryConfig {
@@ -50,6 +54,8 @@ function parsePartialConfig(raw: unknown): PartialMemoryConfig {
 	if (!isRecord(raw)) return {};
 	const autoCaptureRaw = isRecord(raw.autoCapture) ? raw.autoCapture : {};
 	const classifierRaw = isRecord(autoCaptureRaw.classifier) ? autoCaptureRaw.classifier : {};
+	const autoDreamRaw = isRecord(raw.autoDream) ? raw.autoDream : {};
+	const extractOnNewRaw = isRecord(raw.extractOnNew) ? raw.extractOnNew : {};
 
 	return {
 		enabled: typeof raw.enabled === "boolean" ? raw.enabled : undefined,
@@ -82,6 +88,12 @@ function parsePartialConfig(raw: unknown): PartialMemoryConfig {
 						: undefined,
 			},
 		},
+		autoDream: {
+			enabled: typeof autoDreamRaw.enabled === "boolean" ? autoDreamRaw.enabled : undefined,
+		},
+		extractOnNew: {
+			enabled: typeof extractOnNewRaw.enabled === "boolean" ? extractOnNewRaw.enabled : undefined,
+		},
 	};
 }
 
@@ -103,6 +115,8 @@ function mergeConfig(base: MemoryConfig, override: PartialMemoryConfig): MemoryC
 					override.autoCapture?.classifier?.confidenceThreshold ?? base.autoCapture.classifier.confidenceThreshold,
 			},
 		},
+		autoDream: { enabled: override.autoDream?.enabled ?? base.autoDream.enabled },
+		extractOnNew: { enabled: override.extractOnNew?.enabled ?? base.extractOnNew.enabled },
 	};
 }
 
@@ -137,6 +151,18 @@ export function getProjectConfigPath(projectRoot: string): string {
 export async function setEnabledInConfig(configPath: string, enabled: boolean): Promise<void> {
 	const raw = await loadRaw(configPath);
 	raw.enabled = enabled;
+	await mkdir(path.dirname(configPath), { recursive: true });
+	await writeFile(configPath, `${JSON.stringify(raw, null, 2)}\n`, "utf8");
+}
+
+export async function setNestedFlagInConfig(
+	configPath: string,
+	key: "autoDream" | "extractOnNew",
+	enabled: boolean,
+): Promise<void> {
+	const raw = await loadRaw(configPath);
+	const existing = isRecord(raw[key]) ? (raw[key] as Record<string, unknown>) : {};
+	raw[key] = { ...existing, enabled };
 	await mkdir(path.dirname(configPath), { recursive: true });
 	await writeFile(configPath, `${JSON.stringify(raw, null, 2)}\n`, "utf8");
 }

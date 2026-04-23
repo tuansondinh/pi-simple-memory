@@ -43,6 +43,8 @@ export interface MemoryConfig {
 	enabled: boolean;
 	context: MemoryContextConfig;
 	autoCapture: AutoCaptureConfig;
+	autoDream: { enabled: boolean };
+	extractOnNew: { enabled: boolean };
 }
 
 export interface StorageAPI {
@@ -80,6 +82,10 @@ export interface MemoryCommandDeps {
 	storage: StorageAPI;
 	setEnabledGlobal?: (enabled: boolean) => Promise<boolean>;
 	setEnabledProject?: (enabled: boolean) => Promise<boolean>;
+	setAutoDreamGlobal?: (enabled: boolean) => Promise<boolean>;
+	setAutoDreamProject?: (enabled: boolean) => Promise<boolean>;
+	setExtractOnNewGlobal?: (enabled: boolean) => Promise<boolean>;
+	setExtractOnNewProject?: (enabled: boolean) => Promise<boolean>;
 }
 
 export type MemoryCommandHandler = (

@@ -43,7 +43,7 @@ type RememberParams = Static<typeof REMEMBER_PARAMS>;
 
 import { finalizePendingAutoCapture, preparePendingAutoCapture } from "./auto-capture.js";
 import { DREAM_PROMPT, incrementSessions, loadDreamState, markDreamed, saveDreamState, shouldDream } from "./dream-scheduler.js";
-import { getDefaultConfig, getGlobalConfigPath, getProjectConfigPath, loadEffectiveConfig, setEnabledInConfig } from "./config.js";
+import { getDefaultConfig, getGlobalConfigPath, getProjectConfigPath, loadEffectiveConfig, setEnabledInConfig, setNestedFlagInConfig } from "./config.js";
 import { buildContextInjection } from "./context.js";
 import { handleMemoryCommand } from "./commands/index.js";
 import { resolveProjectIdentity } from "./project-id.js";
@@ -95,6 +95,34 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
 			state.config = await loadEffectiveConfig(projectRoot);
 			return true;
 		},
+		setAutoDreamGlobal: async (enabled: boolean) => {
+			const projectRoot = state.identity?.projectRoot;
+			if (!projectRoot) return false;
+			await setNestedFlagInConfig(getGlobalConfigPath(), "autoDream", enabled);
+			state.config = await loadEffectiveConfig(projectRoot);
+			return true;
+		},
+		setAutoDreamProject: async (enabled: boolean) => {
+			const projectRoot = state.identity?.projectRoot;
+			if (!projectRoot) return false;
+			await setNestedFlagInConfig(getProjectConfigPath(projectRoot), "autoDream", enabled);
+			state.config = await loadEffectiveConfig(projectRoot);
+			return true;
+		},
+		setExtractOnNewGlobal: async (enabled: boolean) => {
+			const projectRoot = state.identity?.projectRoot;
+			if (!projectRoot) return false;
+			await setNestedFlagInConfig(getGlobalConfigPath(), "extractOnNew", enabled);
+			state.config = await loadEffectiveConfig(projectRoot);
+			return true;
+		},
+		setExtractOnNewProject: async (enabled: boolean) => {
+			const projectRoot = state.identity?.projectRoot;
+			if (!projectRoot) return false;
+			await setNestedFlagInConfig(getProjectConfigPath(projectRoot), "extractOnNew", enabled);
+			state.config = await loadEffectiveConfig(projectRoot);
+			return true;
+		},
 	};
 
 	pi.on("session_start", async (_event, ctx) => {
@@ -107,7 +135,7 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
 		state.memoryDir = memoryDir;
 		state.ready = true;
 
-		if (config.enabled) {
+		if (config.enabled && config.autoDream.enabled) {
 			let dreamState = await loadDreamState(memoryDir);
 			dreamState = incrementSessions(dreamState);
 			state.dreamDue = shouldDream(dreamState);
@@ -130,7 +158,7 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
 					{ timeout: 20_000 },
 				);
 				if (wants && state.memoryDir) {
-					const updated = markDreamed(await loadDreamState(state.memoryDir));
+					const updated = markDreamed();
 					await saveDreamState(state.memoryDir, updated);
 					state.dreamDue = false;
 					pi.sendUserMessage(DREAM_PROMPT, { deliverAs: "steer" });
@@ -148,7 +176,7 @@ export default function projectMemoryExtension(pi: ExtensionAPI): void {
 	// Ask user to extract memories before starting a new session.
 	pi.on("session_before_switch", async (event, ctx) => {
 		if (event.reason !== "new") return;
-		if (!state.ready || !state.config.enabled) return;
+		if (!state.ready || !state.config.enabled || !state.config.extractOnNew.enabled) return;
 
 		const wantsExtract = await ctx.ui.confirm(
 			"Save memories before starting fresh?",

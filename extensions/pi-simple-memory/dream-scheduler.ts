@@ -48,7 +48,7 @@ export function shouldDream(state: DreamSchedulerState): boolean {
 	return false;
 }
 
-export function markDreamed(state: DreamSchedulerState): DreamSchedulerState {
+export function markDreamed(): DreamSchedulerState {
 	return {
 		lastDreamAt: new Date().toISOString(),
 		sessionsSinceLastDream: 0,
