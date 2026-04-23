@@ -11,7 +11,7 @@
   "license": "MIT",
   "pi": {
     "extensions": [
-      "src/index.ts"
+      "extensions/pi-simple-memory/index.ts"
     ]
   },
   "scripts": {
