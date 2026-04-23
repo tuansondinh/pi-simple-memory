@@ -69,6 +69,10 @@ export interface MemoryState {
 	identity: ProjectIdentity | null;
 	memoryDir: string | null;
 	pendingAutoCaptureCandidates: string[];
+	/** Set on session_start when dream threshold is hit. */
+	dreamDue: boolean;
+	/** Prevents prompting more than once per session. */
+	dreamPrompted: boolean;
 }
 
 export interface MemoryCommandDeps {
