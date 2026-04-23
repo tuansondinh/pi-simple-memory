@@ -1,12 +1,18 @@
 {
   "name": "pi-simple-memory",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple persistent file-based memory for pi agents.",
   "type": "module",
-  "keywords": ["pi-package", "pi", "memory"],
+  "keywords": [
+    "pi-package",
+    "pi",
+    "memory"
+  ],
   "license": "MIT",
   "pi": {
-    "extensions": ["src/index.ts"]
+    "extensions": [
+      "src/index.ts"
+    ]
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
